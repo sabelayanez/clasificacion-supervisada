@@ -13,7 +13,8 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, class
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 import kagglehub
-import Excel_data
+
+from Excel_data import Excel_data
 
 from constants import excel_filename, dataset_name
 from modelos.RegresionLogistica import regresion_logistica
