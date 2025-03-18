@@ -10,7 +10,7 @@ from skimage.color import rgb2gray
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, recall_score, precision_score, classification_report, confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
-from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import label_binarize, StandardScaler
 import matplotlib.pyplot as plt
 import kagglehub
 
@@ -20,17 +20,21 @@ from constants import excel_filename, dataset_name
 from modelos.RegresionLogistica import regresion_logistica
 from modelos.CNN import cnn1, cnn2
 from modelos.KNN import knn
+from modelos.ArbolDeDecision import arbol_decision
+
 ## guardar datos en excel ##
 def save_to_excel(datos):
     # Si el archivo ya existe, se leerá y se agregará nueva información
+    metodo =  datos.pop("Método")
     if os.path.exists(excel_filename):
-        results = pd.read_excel(excel_filename)
-        df = pd.DataFrame([{dato.nombre: dato.valor} for dato in datos])
-        results = pd.concat([results, df], ignore_index=True)
-        results.to_excel(excel_filename, index=False)
+        results = pd.read_excel(excel_filename, index_col=0)
+        df = pd.DataFrame(datos, index=metodo)
+        results = pd.concat([results, df], ignore_index=False)
+        results.to_excel(excel_filename)
     else:
-        results = pd.DataFrame([{'Nombre': dato.nombre, 'Valor': dato.valor} for dato in datos])
-        results.to_excel(excel_filename, index=False)
+        results = pd.DataFrame(datos)
+        results.index = metodo
+        results.to_excel(excel_filename)
 
 #función para hacer la gráfica después de evaluar el rendimiento
 def plot_rendimiento(exactitud, sensibilidad, precision, matriz_confusion, clases, fpr_micro, tpr_micro, roc_auc_micro, fpr, tpr, roc_auc):
@@ -72,15 +76,28 @@ def plot_rendimiento(exactitud, sensibilidad, precision, matriz_confusion, clase
     plt.show()
 
 ## evaluar rendimiento ##
-def evaluar_rendimiento(model, X_test, y_test, nombre_metodo):
+def evaluar_rendimiento(model, X_test, y_test, nombre_metodo, pca):
     # Aplanar las imágenes de prueba
     X_test_flat = X_test.reshape(X_test.shape[0], -1)  # Aplanar a 2D: [n_samples, n_features]
+    
+    # Normalizar los datos de prueba (debe coincidir con la normalización de X_train)
+    scaler = StandardScaler()
+    X_test_scaled = scaler.fit_transform(X_test_flat)
+    
+    # Aplicar PCA al conjunto de prueba (debe ser la misma transformación que en el entrenamiento)
+    if pca is not None:
+        X_test_pca = pca.transform(X_test_scaled)  # Aquí usamos el PCA entrenado para transformar X_test
+    else:
+        X_test_pca = model.pca.transform(X_test_scaled)  # Aquí usamos el PCA entrenado para transformar X_test
 
     # Hacer predicciones
-    y_pred = model.predict(X_test_flat)
+    y_pred = model.predict(X_test_pca)
 
-    model.precision = 100 * accuracy_score(y_test, y_pred);
-    model.sensibility = 100 * recall_score(y_test, y_pred, average='macro');
+    # Métricas de rendimiento
+    precision = 100 * accuracy_score(y_test, y_pred)
+    sensibility = 100 * recall_score(y_test, y_pred, average='macro')
+    precision_score_value = 100 * precision_score(y_test, y_pred, average='macro')
+
     # Informe de clasificación
     print("Informe de evaluación del clasificador sobre el conjunto de test:\n", classification_report(y_test, y_pred))
 
@@ -90,12 +107,12 @@ def evaluar_rendimiento(model, X_test, y_test, nombre_metodo):
     # ROC y AUC
     n_classes = len(np.unique(y_test))
     y_test_bin = label_binarize(y_test, classes=np.arange(0, n_classes, 1))
-    y_score = model.predict_proba(X_test_flat)
+    y_score = model.predict_proba(X_test_pca)
 
     fpr_micro, tpr_micro, _ = roc_curve(y_test_bin.ravel(), y_score.ravel())
     roc_auc_micro = auc(fpr_micro, tpr_micro)
 
-    #ROC por clase
+    # ROC por clase
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
@@ -104,28 +121,25 @@ def evaluar_rendimiento(model, X_test, y_test, nombre_metodo):
         fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], y_score[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
-    #guardar en excel
+    # Aquí iría la función para guardar en Excel (asegúrate de que 'Excel_data' y 'save_to_excel' están bien implementadas)
     datos = {
-        Excel_data("Método", nombre_metodo),
-        Excel_data("Exactitud", 100 * accuracy_score(y_test, y_pred)),
-        Excel_data("Sensibilidad", 100 * recall_score(y_test, y_pred, average='macro')),
-        Excel_data("Precisión", 100 * precision_score(y_test, y_pred, average='macro')),
-        Excel_data("Matriz de confusión", cm),
-        Excel_data("fpr_micro", fpr_micro),
-        Excel_data("tpr_micro", tpr_micro),
-        Excel_data("roc_auc_micro", roc_auc_micro),
-        Excel_data("fpr", fpr),
-        Excel_data("tpr", tpr),
-        Excel_data("roc_auc", roc_auc)
-
+        "Método": [nombre_metodo],
+        "Exactitud": [100 * accuracy_score(y_test, y_pred)],
+        "Precisión": [100 * precision_score(y_test, y_pred, average='macro')],
+        "Matriz de confusión": [cm],
+        "fpr_micro": [fpr_micro],
+        "tpr_micro": [tpr_micro],
+        "roc_auc_micro": [roc_auc_micro],
+        "fpr": [fpr],
+        "tpr": [tpr],
+        "roc_auc": [roc_auc]
     }
     save_to_excel(datos)
-
     # plot rendimiento
     plot_rendimiento(
-        100 * accuracy_score(y_test, y_pred),
-        100 * recall_score(y_test, y_pred, average='macro'),
-        100 * precision_score(y_test, y_pred, average='macro'),
+        precision,
+        sensibility,
+        precision_score_value,
         cm,
         model.classes_,
         fpr_micro,
@@ -176,7 +190,7 @@ def cargar_imagenes(image_path, target_size=(256, 256), channel_mode="rgb"):
 
 ## cargar imágenes TRAIN y TEST ##
 def load_model():
-    opciones = ["regresion_logistica_rgb", "regresion_logistica_gray", "cnn_opcion_1", "cnn_opcion_2", "knn"]
+    opciones = ["regresion_logistica_rgb", "regresion_logistica_gray", "cnn_opcion_1", "cnn_opcion_2", "knn", "arbol_de_decision"]
     print("Seleccione una opción:")
     for i, opcion in enumerate(opciones, 1):
         print(f"{i}. {opcion}")
@@ -210,7 +224,7 @@ def load_model():
     if modelo == "regresion_logistica_rgb":
         ## si es regresión logística rgb ##
         modelLR_rgb = regresion_logistica(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
-        evaluar_rendimiento(modelLR_rgb, X_test_rgb, y_test_encoded, "Regresión Logística")
+        evaluar_rendimiento(modelLR_rgb, X_test_rgb, y_test_encoded, "Regresión Logística", None)
     
     elif modelo == "regresion_logistica_gray":
         ## si es regresión logística gray ##
@@ -240,7 +254,16 @@ def load_model():
     
     elif modelo == "knn":
         ## si es KNN ## 
-        modelKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+        print(f"Tamaño de X_train: {X_train_rgb.shape}")
+        print(f"Tamaño de X_test: {X_test_rgb.shape}")
+        modelKNN, pcaKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+
+        evaluar_rendimiento(modelKNN, X_test_rgb, y_test_encoded, "KNN", pcaKNN)
+    
+    elif modelo == "arbol_de_decision":
+        model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
+        # Evaluar el modelo con las funciones definidas previamente
+        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
 
 if __name__ == "__main__":
     load_model()
