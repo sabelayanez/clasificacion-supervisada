@@ -7,6 +7,20 @@ from skimage.feature import hog
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
+def random_forest(X_train, y_train, X_test, input_shape=(256, 256, 3)):
+    # Crear y entrenar el modelo Random Forest
+    
+    X_train_flat = X_train.reshape(X_train.shape[0], -1)
+    X_test_flat = X_test.reshape(X_test.shape[0], -1)
+    
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_model.fit(X_train_flat, y_train)
+
+    # Hacer predicciones
+    y_pred_rf = rf_model.predict(X_test_flat)
+
+    return rf_model
+
 def rforest_vgg16_pca(X_train, y_train, X_test, input_shape=(256, 256, 3), n_components=500):
     
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
