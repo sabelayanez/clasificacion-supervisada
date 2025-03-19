@@ -23,7 +23,7 @@ train_datagen = ImageDataGenerator(
     horizontal_flip=True
 )
 
-def build_vgg16_model(input_shape=(64, 64, 3), num_classes=5):
+def build_vgg16_model(input_shape=(64, 64, 3), num_classes=5, dense_unit=256, dropout_rate=0.3, learning_rate=0.001):
     # Cargar VGG16 sin la parte superior
     conv_base = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
 
@@ -35,14 +35,14 @@ def build_vgg16_model(input_shape=(64, 64, 3), num_classes=5):
     model = models.Sequential([
         conv_base,
         layers.Flatten(),
-        layers.Dense(256, activation='relu'),
-        layers.Dropout(0.3),
+        layers.Dense(dense_unit, activation='relu'),
+        layers.Dropout(dropout_rate),
         layers.Dense(num_classes, activation='softmax')  # Capa de salida con softmax
     ])
 
     # Compilar el modelo
     model.compile(
-        optimizer=optimizers.Adam(learning_rate=0.001),
+        optimizer=optimizers.Adam(learning_rate=learning_rate),
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy']
     )
