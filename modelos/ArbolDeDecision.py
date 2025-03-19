@@ -28,7 +28,7 @@ def arbol_decision(X_train, y_train):
 
     return model_tree  # Devolver el modelo entrenado
 
-def arbol_decision_vgg16(X_train, y_train, X_test, input_shape(256,256,3)):
+def arbol_decision_vgg16(X_train, y_train, X_test, input_shape=(256,256,3)):
     # Cargar VGG16 preentrenado SIN la capa superior
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
@@ -47,7 +47,7 @@ def arbol_decision_vgg16(X_train, y_train, X_test, input_shape(256,256,3)):
     # Precisión usando VGG16 como extractor
     return model_tree_vgg
 
-def arbol_vgg16_pca(X_train, y_train, X_test, input_shape(256,256,3), n_components=500):
+def arbol_vgg16_pca(X_train, y_train, X_test, input_shape=(256,256,3), n_components=500):
     
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
