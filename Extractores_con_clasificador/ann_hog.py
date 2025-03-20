@@ -1,11 +1,3 @@
-from skimage.feature import hog
-import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.utils import to_categorical
-from sklearn.metrics import accuracy_score, classification_report
-
 def ann_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes):
     # Convertir las etiquetas a one-hot encoding
     y_train_onehot = to_categorical(y_train, num_classes)
