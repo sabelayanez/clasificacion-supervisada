@@ -4,26 +4,29 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score, classification_report
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_validate
 
-def knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded):
+from constants import CV, scoring
+
+def knn(X_train_rgb, y_train_encoded, X_test_rgb):
     X_train_flattened = X_train_rgb.reshape(X_train_rgb.shape[0], -1)
     X_test_flattened = X_test_rgb.reshape(X_test_rgb.shape[0], -1)
 
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_flattened)
-    X_test_scaled = scaler.transform(X_test_flattened)
     
     pca = PCA(n_components=50)  # You can adjust n_components as needed
     X_train_pca = pca.fit_transform(X_train_scaled)
-    #X_test_pca = pca.transform(X_test_scaled)
     
     knn_model = KNeighborsClassifier(n_neighbors=3)
-    knn_model.fit(X_train_pca, y_train_encoded)
+
+    scoresKNN = cross_validate(knn_model, X_train_pca, y_train_encoded, cv=CV, scoring=scoring)
     
+    knn_model.fit(X_train_pca, y_train_encoded)
+
     # Return both the trained KNN model and PCA model as a tuple
-    return knn_model, pca
+    return knn_model, pca, scoresKNN
 
 
 def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded):

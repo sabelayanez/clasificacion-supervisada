@@ -79,12 +79,11 @@ def load_model():
     
     elif modelo == "knn":
         ## si es KNN ## 
-        print(f"Tamaño de X_train: {X_train_rgb.shape}")
-        print(f"Tamaño de X_test: {X_test_rgb.shape}")
-        modelKNN, pcaKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+        modelKNN, pcaKNN, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
 
         evaluar_rendimiento(modelKNN, X_test_rgb, y_test_encoded, "KNN", pcaKNN)
-    
+        save_excel_cv(scoresKNN, "KNN")
+
     elif modelo == "arbol_de_decision":
         model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
