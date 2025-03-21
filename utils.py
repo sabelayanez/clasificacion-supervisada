@@ -35,6 +35,34 @@ def save_excel_cv(scores, nombre_metodo):
         results.index = [nombre_metodo]
         results.to_excel(excel_filename)
 
+def evaluar_mobileNetV2(X_test, y_test, model, history):
+    # Evaluar el modelo en los datos de prueba
+    loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+    print(f"Precisión en los datos de prueba: {accuracy:.2f}")
+    
+    # Visualización del historial de entrenamiento
+    plt.figure(figsize=(12, 6))
+
+    # Pérdida
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['loss'], label='Pérdida de entrenamiento')
+    plt.plot(history.history['val_loss'], label='Pérdida de validación')
+    plt.title('Pérdida durante el entrenamiento')
+    plt.xlabel('Épocas')
+    plt.ylabel('Pérdida')
+    plt.legend()
+
+    # Precisión
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['accuracy'], label='Precisión de entrenamiento')
+    plt.plot(history.history['val_accuracy'], label='Precisión de validación')
+    plt.title('Precisión durante el entrenamiento')
+    plt.xlabel('Épocas')
+    plt.ylabel('Precisión')
+    plt.legend()
+
+    plt.show()
+
 ## guardar datos en excel ##
 def save_to_excel(datos):
     # Si el archivo ya existe, se leerá y se agregará nueva información

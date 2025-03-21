@@ -12,7 +12,7 @@ from utils import cargar_imagenes, evaluar_rendimiento, save_excel_cv
 from modelos.RegresionLogistica import regresion_logistica
 from modelos.CNN import cnn1, cnn2
 from modelos.KNN import knn
-from modelos.ArbolDeDecision import arbol_decision
+from modelos.ArbolDeDecision import arbol_decision, arbol_decision_vgg16, arbol_vgg16_pca
 
 from tensorflow.keras.utils import to_categorical
 from modelos.MobileNetV2 import train_mobilenetv2_model
@@ -82,14 +82,21 @@ def load_model():
     
     elif modelo == "knn":
         ## si es KNN ## 
-        modelKNN, pcaKNN, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+        _, _, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
         save_excel_cv(scoresKNN, "KNN")
 
     elif modelo == "arbol_de_decision":
         model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
-
+    elif modelo == "arbol_de_decision_vgg":
+        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded, feature_extractor="vgg16")
+        # Evaluar el modelo con las funciones definidas previamente
+        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16")
+    elif modelo == "arbol_de_decision_vgg_pca":
+        model_tree = arbol_vgg16_pca(X_train_rgb_64, y_train_encoded, X_test_rgb_64, feature_extractor="vgg16")
+        # Evaluar el modelo con las funciones definidas previamente
+        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16 PCA")
     elif modelo == "":
         num_classes = len(np.unique(y_train_encoded))  # Asegurar que tenemos el número correcto de clases
         y_train_onehot = to_categorical(y_train_encoded, num_classes)
@@ -128,13 +135,17 @@ def load_model():
                         validation_data=(X_test_rgb_64, y_test_encoded)))
     
         ## KNN ## 
-        modelKNN, pcaKNN, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+        _, _, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
 
         save_excel_cv(scoresKNN, "KNN")
 
         ## Árbol de Decisión ##
         model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
+        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
 
+        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded, feature_extractor="vgg16")
+        # Evaluar el modelo con las funciones definidas previamente
+        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16")
         ## diagrama de cajas validación cru
         data = [scoresLR_rgb['test_accuracy'], scoresLR_gray['test_accuracy'], scoresKNN['test_accuracy']]
         _, ax = plt.subplots()
