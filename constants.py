@@ -1,6 +1,16 @@
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, make_scorer
+
 excel_filename = "results.xlsx"
+excel_filename_cv = "results_cv.xlsx"
 dataset_name = "sujaykapadnis/flowers-image-classification"
 opciones = ["regresion_logistica_rgb", "regresion_logistica_gray", "cnn_opcion_1", "cnn_opcion_2", "knn"]
 ## cross validation
-CV = 20
-scoring = ['precision_macro', 'recall_macro', 'precision_micro', 'recall_micro', 'f1_macro', 'accuracy', 'roc_auc']
+CV = 5
+# exactitud, sensibilidad, especificidad, precisión, f1-score y área bajo la curva (AUC)
+scoring = {
+    'accuracy': 'accuracy',
+    'precision': 'precision_macro',
+    'recall': 'recall_macro',
+    'f1': 'f1_macro',
+    'roc_auc': 'roc_auc_ovr'
+}

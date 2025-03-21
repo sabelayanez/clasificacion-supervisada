@@ -1,5 +1,7 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
+from sklearn.model_selection import StratifiedKFold
+
 import matplotlib.pyplot as plt
 
 from constants import CV, scoring
@@ -12,7 +14,7 @@ def regresion_logistica(X_train, y_train_encoded):
     modelLR = LogisticRegression(penalty=None, solver='lbfgs', max_iter=10000)
 
     # Validación cruzada
-    scoresLR = cross_validate(modelLR, X_train_flat, y_train_encoded, cv=CV, scoring=scoring)
+    scoresLR = cross_validate(modelLR, X_train_flat, y_train_encoded, cv=5, scoring=scoring)
 
     # Entren
     modelLR.fit(X_train_flat, y_train_encoded)

@@ -47,13 +47,11 @@ def load_model():
 
     if modelo == "regresion_logistica_rgb":
         ## si es regresión logística rgb ##
-        modelLR_rgb, scoresLR_rgb = regresion_logistica(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
-        evaluar_rendimiento(modelLR_rgb, X_test_rgb, y_test_encoded, "Regresión Logística")
+        modelLR_rgb, scoresLR_rgb = regresion_logistica(X_train_rgb, y_train_encoded)
         save_excel_cv(scoresLR_rgb, "Regresión Logística RGB")
     elif modelo == "regresion_logistica_gray":
         ## si es regresión logística gray ##
         modelLR_gray, scoresLR_gray = regresion_logistica(X_train_gray, y_train_encoded, X_test_gray, y_test_encoded)
-        evaluar_rendimiento(modelLR_gray, X_test_gray, y_test_encoded, "Regresión Logística")
         save_excel_cv(scoresLR_gray, "Regresión Logística gray")
 
     elif modelo == "cnn_opcion_1":

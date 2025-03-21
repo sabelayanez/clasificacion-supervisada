@@ -22,7 +22,7 @@ def save_excel_cv(scores, nombre_metodo):
         'recall_micro': [np.mean(scores['test_recall_micro'])], 
         'f1_macro': [np.mean(scores['test_f1_macro'])], 
         'accuracy': [np.mean(scores['test_accuracy'])], 
-        'roc_auc': [np.mean(scores['test_roc_auc'])]
+        'roc_auc': [np.mean(scores['test_roc_auc_ovr'])]
     }
     print
     if os.path.exists(excel_filename):
