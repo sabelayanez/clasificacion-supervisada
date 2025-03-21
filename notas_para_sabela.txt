@@ -13,4 +13,7 @@ Los otros 2 están en el pruebas_cross_val.ipynb. En este caso lo podemos hacer 
 Lo que pasa es que no me funciona bien, no me sale como en el de regresión logistica, me sale solo un resultado
 Creo que en el scoring hay que poner roc_auc_ovo en vez de roc_auc
 ------------------------------------------------
+Random forest
+Está en el pruebas_cross_val.ipynb. Lo dejé probando pero no miré si tiene algún fallo
+
 
