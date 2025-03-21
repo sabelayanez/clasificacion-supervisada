@@ -14,6 +14,11 @@ from modelos.CNN import cnn1, cnn2
 from modelos.KNN import knn
 from modelos.ArbolDeDecision import arbol_decision
 
+from tensorflow.keras.utils import to_categorical
+from modelos.MobileNetV2 import train_mobilenetv2_model
+
+import matplotlib.pyplot as plt
+
 def load_model():
     print("Seleccione una opción:")
     for i, opcion in enumerate(opciones, 1):
@@ -78,14 +83,63 @@ def load_model():
     elif modelo == "knn":
         ## si es KNN ## 
         modelKNN, pcaKNN, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
-
-        evaluar_rendimiento(modelKNN, X_test_rgb, y_test_encoded, "KNN", pcaKNN)
         save_excel_cv(scoresKNN, "KNN")
 
     elif modelo == "arbol_de_decision":
         model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
+
+    elif modelo == "":
+        num_classes = len(np.unique(y_train_encoded))  # Asegurar que tenemos el número correcto de clases
+        y_train_onehot = to_categorical(y_train_encoded, num_classes)
+        y_test_onehot = to_categorical(y_test_encoded, num_classes)
+
+        # Llamada a la función de entrenamiento
+        model_1 = train_mobilenetv2_model(X_train_rgb, y_train_onehot, X_test_rgb, y_test_onehot, epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
+        model_2 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3), epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
+        model_3 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.0001)
+        model_4 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.3, learning_rate=0.001)
+
+    else: 
+        print("Se realizarán todos los modelos")  
+        ## regresión logística rgb ##
+        modelLR_rgb, scoresLR_rgb = regresion_logistica(X_train_rgb, y_train_encoded)
+        save_excel_cv(scoresLR_rgb, "Regresión Logística RGB")
+        ## regresión logística gray ##
+        modelLR_gray, scoresLR_gray = regresion_logistica(X_train_gray, y_train_encoded, X_test_gray, y_test_encoded)
+        save_excel_cv(scoresLR_gray, "Regresión Logística gray")
+        ## CNN1 ##
+        model1 = cnn1()
+        model1.summary()
+        
+        history.append(model1.fit(X_train_rgb_64, y_train_encoded,
+                            epochs=epochs,
+                            batch_size=batch_size,
+                            validation_data=(X_test_rgb_64, y_test_encoded)))
+        
+        ## CNN2 ##    
+        model2 = cnn2()
+        model2.summary()
+
+        history.append(model2.fit(X_train_rgb_64, y_train_encoded,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        validation_data=(X_test_rgb_64, y_test_encoded)))
+    
+        ## KNN ## 
+        modelKNN, pcaKNN, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+
+        save_excel_cv(scoresKNN, "KNN")
+
+        ## Árbol de Decisión ##
+        model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
+
+        ## diagrama de cajas validación cru
+        data = [scoresLR_rgb['test_accuracy'], scoresLR_gray['test_accuracy'], scoresKNN['test_accuracy']]
+        _, ax = plt.subplots()
+        ax.set_title('Modelos')
+        ax.boxplot(data,labels=['LR_RGB','LR_GRAY','KNN'])
 
 if __name__ == "__main__":
     load_model()
