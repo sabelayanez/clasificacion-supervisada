@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from skimage.feature import hog
 from sklearn.preprocessing import StandardScaler
 
-from constants import scoring
+from constants import scoring, CV
 
 import numpy as np
 
@@ -24,7 +24,7 @@ def random_forest(X_train, y_train, X_test):
     y_pred_rf = modelRF.predict(X_test_flat)
 
     # Validación cruzada
-    scoresRF = cross_validate(modelRF, X_train_flat, y_train, cv=5, scoring=scoring)
+    scoresRF = cross_validate(modelRF, X_train_flat, y_train, cv=CV, scoring=scoring)
 
     return modelRF, scoresRF
 
@@ -54,7 +54,7 @@ def rforest_vgg16_pca(X_train, y_train, X_test, input_shape=(256, 256, 3), n_com
     )
 
     # Validación cruzada
-    scoresRF = cross_validate(modelRF, X_train_pca, y_train, cv=5, scoring=scoring)
+    scoresRF = cross_validate(modelRF, X_train_pca, y_train, cv=CV, scoring=scoring)
 
     modelRF.fit(X_train_pca, y_train)
 
@@ -100,6 +100,12 @@ def rforest_vgg16_pca_hog(X_train, y_train, X_test, X_train_gray, X_test_gray, i
 
     # Entrenar Random Forest con características combinadas
     model_rf_combined = RandomForestClassifier(n_estimators=200, max_depth=30, random_state=42)
+    
+    cv_scores = cross_validate(model_rf_combined, X_train_combined, y_train, cv=CV, scoring=scoring)
+    print(f'Accuracy scores for each fold: {cv_scores}')
+    #print(f'Mean cross-validation accuracy: {cv_scores.mean()}')
+    print(f'Mean cross-validation accuracy: {cv_scores["test_score"].mean()}')
+
     model_rf_combined.fit(X_train_combined, y_train)
 
-    return model_rf_combined
+    return model_rf_combined, cv_scores

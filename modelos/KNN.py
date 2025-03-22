@@ -52,7 +52,7 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
     ])
 
     # Usar GridSearchCV para buscar los mejores hiperparámetros
-    grid_search = GridSearchCV(pipeline, param_grid, cv=5)  # Validación cruzada
+    grid_search = GridSearchCV(pipeline, param_grid, cv=CV, scoring=scoring, refit='accuracy')  # Validación cruzada
     grid_search.fit(X_train_scaled, y_train_encoded)
 
     # Imprimir los mejores parámetros encontrados
@@ -64,8 +64,11 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
     # Extraer la mejor instancia de PCA y KNN
     best_pca = best_model.named_steps['pca']
     best_knn = best_model.named_steps['knn']
-    results = pd.DataFrame(grid_search.cv_results_)[['param_pca__n_components', 'param_knn__n_neighbors', 'mean_test_score']]
-    print(results.sort_values(by='mean_test_score', ascending=False))  # Ordenar de mejor a peor
+    results = pd.DataFrame(grid_search.cv_results_)[[
+        'param_pca__n_components', 'param_knn__n_neighbors', 
+        'mean_test_accuracy', 'mean_test_precision', 'mean_test_recall', 'mean_test_f1', 'mean_test_roc_auc'
+    ]]
+    print(results.sort_values(by='mean_test_accuracy', ascending=False))  # Ordenar de mejor a peor
 
-    # Devolver el modelo KNN y la instancia de PCA como una tupla (igual que la función knn)
-    return best_knn, best_pca
+    return best_knn, best_pca, results
+
