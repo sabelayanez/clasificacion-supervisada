@@ -13,6 +13,8 @@ from modelos.RegresionLogistica import regresion_logistica
 from modelos.CNN import cnn1, cnn2
 from modelos.KNN import knn
 from modelos.ArbolDeDecision import arbol_decision, arbol_decision_vgg16, arbol_vgg16_pca
+from modelos.MobileNetV2 import train_mobilenetv2_model
+from modelos.RandomForest import random_forest, rforest_vgg16_pca, rforest_vgg16_pca_hog
 
 from tensorflow.keras.utils import to_categorical
 from modelos.MobileNetV2 import train_mobilenetv2_model
@@ -26,10 +28,7 @@ def load_model():
     seleccion = int(input("Ingrese el número de la opción: "))
     
     # Validar que la selección sea válida
-    if 1 <= seleccion <= len(opciones):
-        modelo = opciones[seleccion - 1]
-    else:
-        print("Selección no válida.")
+    modelo = opciones[seleccion - 1]
     # Descargar dataset
     path = kagglehub.dataset_download(dataset_name)
 
@@ -90,14 +89,14 @@ def load_model():
         # Evaluar el modelo con las funciones definidas previamente
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
     elif modelo == "arbol_de_decision_vgg":
-        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded, feature_extractor="vgg16")
+        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16")
     elif modelo == "arbol_de_decision_vgg_pca":
-        model_tree = arbol_vgg16_pca(X_train_rgb_64, y_train_encoded, X_test_rgb_64, feature_extractor="vgg16")
+        model_tree = arbol_vgg16_pca(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16 PCA")
-    elif modelo == "":
+    elif modelo == "mobile_net_v2":
         num_classes = len(np.unique(y_train_encoded))  # Asegurar que tenemos el número correcto de clases
         y_train_onehot = to_categorical(y_train_encoded, num_classes)
         y_test_onehot = to_categorical(y_test_encoded, num_classes)
@@ -107,6 +106,17 @@ def load_model():
         model_2 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3), epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
         model_3 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.0001)
         model_4 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.3, learning_rate=0.001)
+
+    elif modelo == "random_forest":
+        modelRF, scoresRF = random_forest(X_train_rgb_64, y_train, X_test_rgb_64)
+        save_excel_cv(scoresRF, "RANDOM FOREST")
+    
+    elif modelo == "rforest_vgg16_pca":
+        rf_model, scoresRF = rforest_vgg16_pca(X_train_rgb, y_train, X_test_rgb)        
+        save_excel_cv(scoresRF, "RANDOM FOREST VGG16 PCA")
+    
+    elif modelo == "rforest_vgg16_pca_hog":
+        rf_model = rforest_vgg16_pca_hog(X_train_rgb_64, y_train, X_test_rgb_64)
 
     else: 
         print("Se realizarán todos los modelos")  
@@ -143,7 +153,7 @@ def load_model():
         model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
 
-        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded, feature_extractor="vgg16")
+        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16")
         ## diagrama de cajas validación cru

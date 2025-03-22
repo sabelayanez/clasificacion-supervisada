@@ -27,7 +27,7 @@ def arbol_decision(X_train, y_train):
 
     return model_tree  # Devolver el modelo entrenado
 
-def arbol_decision_vgg16(X_train, y_train, X_test, input_shape=(256,256,3)):
+def arbol_decision_vgg16(X_train, y_train, input_shape=(256,256,3)):
     # Cargar VGG16 preentrenado SIN la capa superior
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
@@ -44,18 +44,16 @@ def arbol_decision_vgg16(X_train, y_train, X_test, input_shape=(256,256,3)):
     # Precisión usando VGG16 como extractor
     return model_tree_vgg
 
-def arbol_vgg16_pca(X_train, y_train, X_test, input_shape=(256,256,3)):
+def arbol_vgg16_pca(X_train, y_train, input_shape=(256,256,3)):
     
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
 
     # Extraer características con VGG16
     X_train_features = feature_extractor.predict(X_train)
-    X_test_features = feature_extractor.predict(X_test)
 
     # Aplanar las características extraídas
     X_train_features_flat = X_train_features.reshape(X_train_features.shape[0], -1)
-    X_test_features_flat = X_test_features.reshape(X_test_features.shape[0], -1)
     
     pca = PCA(n_components=500, svd_solver='randomized')  # Elegimos 200 características más relevantes
     X_train_pca = pca.fit_transform(X_train_features_flat)

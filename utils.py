@@ -16,24 +16,22 @@ from constants import excel_filename, excel_filename_cv
 ## funciones para validación cruzada ##
 def save_excel_cv(scores, nombre_metodo):
     datos = {
-        'precision_macro': [np.mean(scores['test_precision_macro'])],
-        'recall_macro': [np.mean(scores['test_recall_macro'])],
-        'precision_micro': [np.mean(scores['test_precision_micro'])],
-        'recall_micro': [np.mean(scores['test_recall_micro'])], 
-        'f1_macro': [np.mean(scores['test_f1_macro'])], 
+        'precision': [np.mean(scores['test_precision'])],
+        'recall': [np.mean(scores['test_recall'])], 
+        'f1': [np.mean(scores['test_f1'])], 
         'accuracy': [np.mean(scores['test_accuracy'])], 
-        'roc_auc': [np.mean(scores['test_roc_auc_ovr'])]
+        'roc_auc': [np.mean(scores['test_roc_auc'])]
     }
     print
     if os.path.exists(excel_filename):
-        results = pd.read_excel(excel_filename, index_col=0)
+        results = pd.read_excel(excel_filename_cv, index_col=0)
         df = pd.DataFrame(datos, index=[nombre_metodo])
         results = pd.concat([results, df], ignore_index=False)
-        results.to_excel(excel_filename)
+        results.to_excel(excel_filename_cv)
     else:
         results = pd.DataFrame(datos)
         results.index = [nombre_metodo]
-        results.to_excel(excel_filename)
+        results.to_excel(excel_filename_cv)
 
 def evaluar_mobileNetV2(X_test, y_test, model, history):
     # Evaluar el modelo en los datos de prueba
