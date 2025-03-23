@@ -15,9 +15,15 @@ def arbol_decision(X_train, y_train):
     X_train_flat = X_train.reshape(X_train.shape[0], -1)  # De 4D a 2D
 
     param_grid = {
+<<<<<<< HEAD
         'max_depth': [10, 20],  # Profundidad máxima del árbol
         'min_samples_split': [2, 10],  # Mínimo número de muestras para dividir un nodo
         'min_samples_leaf': [1, 2],  # Mínimo número de muestras en un nodo hoja
+=======
+        'max_depth': [10],  # Profundidad máxima del árbol
+        'min_samples_split': [2],  # Mínimo número de muestras para dividir un nodo
+        'min_samples_leaf': [1],  # Mínimo número de muestras en un nodo hoja
+>>>>>>> 6fd7768 (no se ni que estoy subiendo)
         'criterion': ['gini'],  # Función de división
     }
 
@@ -25,10 +31,9 @@ def arbol_decision(X_train, y_train):
     grid_search = GridSearchCV(DecisionTreeClassifier(random_state=42), param_grid, cv=CV, scoring=scoring, refit='accuracy') #Validación cruzada
     grid_search.fit(X_train_flat, y_train)
 
-    print(f"Mejores parámetros: {grid_search.best_params_}")
-
     # Obtener el mejor modelo
     model_tree = grid_search.best_estimator_
+<<<<<<< HEAD
     results = pd.DataFrame(grid_search.cv_results_)[[
         'param_pca__n_components', 'param_knn__n_neighbors', 
         'mean_test_accuracy', 'mean_test_precision', 'mean_test_recall', 'mean_test_f1', 'mean_test_roc_auc'
@@ -36,6 +41,12 @@ def arbol_decision(X_train, y_train):
     return model_tree, results  # Devolver el modelo entrenado
 
 def arbol_decision_vgg16(X_train, y_train, X_test, y_test_encoded, input_shape=(256,256,3)):
+=======
+    print(grid_search)
+    return model_tree, grid_search  # Devolver el modelo entrenado
+
+def arbol_decision_vgg16(X_train, y_train, input_shape=(256,256,3)):
+>>>>>>> 6fd7768 (no se ni que estoy subiendo)
     # Cargar VGG16 preentrenado SIN la capa superior
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
