@@ -5,6 +5,7 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
 from sklearn.metrics import accuracy_score, classification_report
+from Extractores_con_clasificador import *
 
 def extract_hog_features(images):
     hog_features = []
@@ -27,6 +28,3 @@ def main_hog(X_train, X_test, y_train, y_test, num_classes):
     svm_model = svm_hog(X_train_hog, y_train, X_test_hog, y_test)
 
     return ann_model, svm_model
-
-num_classes = len(np.unique(y_train))  # Suponiendo que y_train contiene las etiquetas
-main_hog(X_train_gray, X_test_gray, y_train_encoded, y_test_encoded, num_classes)
