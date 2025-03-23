@@ -226,3 +226,29 @@ def cargar_imagenes(image_path, target_size=(256, 256), channel_mode="rgb"):
                     labels.append(folder)  # Guardar etiqueta
 
     return np.array(img_list), np.array(labels)
+
+def validacion(X_test, y_test_encoded, y_pred):
+    # Visualizar las imágenes y las predicciones
+    plt.figure(figsize=(12, 6))  # Ajustar tamaño
+
+    for i in range(10):  # Mostrar 10 imágenes
+        index = random.randint(0, X_test.shape[0] - 1)
+        image_to_show = X_test[index]
+        true_label_num = y_test_encoded[index]  # Etiqueta real codificada
+        
+        # Obtener la predicción
+        pred_label_num = np.argmax(y_pred[index])  # Etiqueta predicha
+        
+        true_label_str = class_names[true_label_num]  # Nombre de la clase real
+        pred_label_str = class_names[pred_label_num]  # Nombre de la clase predicha
+
+        # Dibujar imagen
+        plt.subplot(2, 5, i + 1)
+        plt.imshow(image_to_show)
+        plt.axis('off')
+
+        # Mostrar la predicción
+        if true_label_num == pred_label_num:
+            plt.title(pred_label_str)
+        else:
+            plt.title(f"{pred_label_str} != {true_label_str}", color='red')
