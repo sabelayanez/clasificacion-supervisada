@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 
-def random_forest(X_train, y_train_encoded, X_test, y_test_encoded, class_names):
+def random_forest(X_train, y_train_encoded, X_test, y_test_encoded):
     # Aplanar imágenes
     X_train_flat = X_train.reshape(X_train.shape[0], -1)
     X_test_flat = X_test.reshape(X_test.shape[0], -1)

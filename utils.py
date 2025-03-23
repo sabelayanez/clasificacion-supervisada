@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import numpy as np
-
+import random
 from constants import excel_filename, excel_filename_cv
 
 ## funciones para validación cruzada ##
@@ -22,7 +22,7 @@ def save_excel_cv(scores, nombre_metodo):
         'accuracy': [np.mean(scores['test_accuracy'])], 
         'roc_auc': [np.mean(scores['test_roc_auc'])]
     }
-    print
+    
     if os.path.exists(excel_filename):
         results = pd.read_excel(excel_filename_cv, index_col=0)
         df = pd.DataFrame(datos, index=[nombre_metodo])

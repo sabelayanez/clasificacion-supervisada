@@ -2,7 +2,6 @@ import os
 import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import cross_validate
 
 import kagglehub
 
@@ -11,7 +10,7 @@ from utils import cargar_imagenes, evaluar_rendimiento, save_excel_cv
 
 from modelos.RegresionLogistica import regresion_logistica
 from modelos.CNN import cnn1, cnn2
-from modelos.KNN import knn
+from modelos.KNN import knn_with_gridsearch
 from modelos.ArbolDeDecision import arbol_decision, arbol_decision_vgg16, arbol_vgg16_pca
 from modelos.MobileNetV2 import train_mobilenetv2_model
 from modelos.RandomForest import random_forest, rforest_vgg16_pca, rforest_vgg16_pca_hog
@@ -51,8 +50,9 @@ def load_model():
 
     if modelo == "regresion_logistica_rgb":
         ## si es regresión logística rgb ##
-        modelLR_rgb, scoresLR_rgb = regresion_logistica(X_train_rgb, y_train_encoded)
+        modelLR_rgb, scoresLR_rgb = regresion_logistica(X_train_rgb, y_train_encoded, X_train_rgb, y_test_encoded)
         save_excel_cv(scoresLR_rgb, "Regresión Logística RGB")
+
     elif modelo == "regresion_logistica_gray":
         ## si es regresión logística gray ##
         modelLR_gray, scoresLR_gray = regresion_logistica(X_train_gray, y_train_encoded, X_test_gray, y_test_encoded)
@@ -81,42 +81,45 @@ def load_model():
     
     elif modelo == "knn":
         ## si es KNN ## 
-        _, _, scoresKNN = knn(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+        modelKNN, best_pca_knn, scoresKNN = knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
         save_excel_cv(scoresKNN, "KNN")
 
     elif modelo == "arbol_de_decision":
         model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
-        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
+        #evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
+    
     elif modelo == "arbol_de_decision_vgg":
-        model_tree = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded)
+        model_tree_vgg16 = arbol_decision_vgg16(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, input_shape=(64,64,3))
         # Evaluar el modelo con las funciones definidas previamente
-        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16")
+        #evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16")
+    
     elif modelo == "arbol_de_decision_vgg_pca":
-        model_tree = arbol_vgg16_pca(X_train_rgb_64, y_train_encoded)
+        model_tree_vgg16_pca = arbol_vgg16_pca(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, input_shape=(64,64,3), n_components=500)
         # Evaluar el modelo con las funciones definidas previamente
-        evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16 PCA")
+        #evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión VGG16 PCA")
+    
     elif modelo == "mobile_net_v2":
         num_classes = len(np.unique(y_train_encoded))  # Asegurar que tenemos el número correcto de clases
         y_train_onehot = to_categorical(y_train_encoded, num_classes)
         y_test_onehot = to_categorical(y_test_encoded, num_classes)
 
         # Llamada a la función de entrenamiento
-        model_1 = train_mobilenetv2_model(X_train_rgb, y_train_onehot, X_test_rgb, y_test_onehot, epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
-        model_2 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3), epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
-        model_3 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.0001)
-        model_4 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.3, learning_rate=0.001)
+        model_mobile1 = train_mobilenetv2_model(X_train_rgb, y_train_onehot, X_test_rgb, y_test_onehot, epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
+        model_mobile2 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3), epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001)
+        model_mobile3 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.0001)
+        model_mobile4 = train_mobilenetv2_model(X_train_rgb_64, y_train_onehot, X_test_rgb_64, y_test_onehot, input_shape=(64, 64, 3),epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.3, learning_rate=0.001)
 
     elif modelo == "random_forest":
-        modelRF, scoresRF = random_forest(X_train_rgb_64, y_train, X_test_rgb_64)
+        modelRF, scoresRF = random_forest(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded)
         save_excel_cv(scoresRF, "RANDOM FOREST")
     
     elif modelo == "rforest_vgg16_pca":
-        rf_model, scoresRF = rforest_vgg16_pca(X_train_rgb, y_train, X_test_rgb)        
+        modelRF_vgg_pca, scoresRF_vgg_pca = rforest_vgg16_pca(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)        
         save_excel_cv(scoresRF, "RANDOM FOREST VGG16 PCA")
     
     elif modelo == "rforest_vgg16_pca_hog":
-        rf_model = rforest_vgg16_pca_hog(X_train_rgb_64, y_train, X_test_rgb_64)
+        modelRF_hog, scoresRF_hog = rforest_vgg16_pca_hog(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, X_train_gray, X_test_gray)
 
     else: 
         print("Se realizarán todos los modelos")  
