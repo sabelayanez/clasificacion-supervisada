@@ -85,7 +85,7 @@ def load_model():
         save_excel_cv(scoresKNN, "KNN")
 
     elif modelo == "arbol_de_decision":
-        model_tree = arbol_decision(X_train_rgb_64, y_train_encoded)
+        model_tree, grid_search = arbol_decision(X_train_rgb_64, y_train_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         #evaluar_rendimiento(model_tree, X_test_rgb_64, y_test, "Árbol de Decisión")
     

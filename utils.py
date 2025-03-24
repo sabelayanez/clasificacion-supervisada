@@ -22,8 +22,12 @@ def save_excel_cv(scores, nombre_metodo):
         'accuracy': [np.mean(scores['test_accuracy'])], 
         'roc_auc': [np.mean(scores['test_roc_auc'])]
     }
+<<<<<<< HEAD
     
     if os.path.exists(excel_filename):
+=======
+    if os.path.exists(excel_filename_cv):
+>>>>>>> 17a9f4ad4e051db476db2d819bfbfaed5be5a43f
         results = pd.read_excel(excel_filename_cv, index_col=0)
         df = pd.DataFrame(datos, index=[nombre_metodo])
         results = pd.concat([results, df], ignore_index=False)
