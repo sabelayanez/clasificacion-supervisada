@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
@@ -8,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_validate
 
 from constants import CV, scoring
-from utils import validacion
+from utils import evaluar_rendimiento
 
 def knn(X_train_rgb, y_train_encoded, X_test_rgb):
     X_train_flattened = X_train_rgb.reshape(X_train_rgb.shape[0], -1)
@@ -64,15 +65,26 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
     best_knn = best_model.named_steps['knn']
 
     results = pd.DataFrame(grid_search.cv_results_)[[
-        'param_pca__n_components', 'param_knn__n_neighbors',
-        'mean_test_accuracy', 'mean_test_precision', 'mean_test_recall',
-        'mean_test_f1', 'mean_test_roc_auc'
+        'test_accuracy', 
+        'test_precision', 
+        'test_recall',
+        'test_f1', 
+        'test_roc_auc'
     ]]
 
-    print(results.sort_values(by='mean_test_accuracy', ascending=False))
-    #visualize_knn_predictions(best_knn, best_pca, scaler, X_test_rgb_64, y_test_encoded, class_names)
-    y_pred_knn = grid_search.predict(X_test_scaled)
-    validacion(X_test_rgb, y_test_encoded, y_pred_knn)
+    # Obtener las predicciones del modelo
+    y_pred_prob = grid_search.predict(X_test_rgb)  # Probabilidades de las clases
+    y_pred = (y_pred_prob > 0.5).astype(int)  # Convertir las probabilidades en etiquetas de clase (binario)
 
+    # Si es clasificación multiclase
+    y_pred = np.argmax(y_pred_prob, axis=1)
+
+
+    evaluar_rendimiento(
+        y_test_encoded,
+        y_pred_prob,
+        y_pred,
+        "KNN"
+    )
     return best_knn, best_pca, results 
 

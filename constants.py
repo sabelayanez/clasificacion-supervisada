@@ -27,3 +27,5 @@ scoring = {
     'f1': 'f1_macro',
     'roc_auc': 'roc_auc_ovr'
 }
+
+class_names = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
