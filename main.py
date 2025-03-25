@@ -32,12 +32,12 @@ def load_model():
     path = kagglehub.dataset_download(dataset_name)
 
     # cargar train y test
-    X_train_rgb, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="rgb")
-    X_test_rgb, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="rgb")
-    X_train_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="grayscale")
-    X_test_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="grayscale")
-    X_train_rgb_64, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), target_size=(64, 64))
-    X_test_rgb_64, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), target_size=(64, 64))
+    #X_train_rgb, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="rgb")
+    #X_test_rgb, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="rgb")
+    #X_train_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="grayscale")
+    #X_test_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="grayscale")
+    X_train_rgb_64, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), target_size=(64, 64))
+    X_test_rgb_64, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), target_size=(64, 64))
 
     # Codificar etiquetas
     label_encoder = LabelEncoder()
@@ -68,7 +68,7 @@ def load_model():
 
     elif modelo == "knn":
         ## si es KNN ## 
-        modelKNN, pcaKNN, scoresKNN = knn_with_gridsearch(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded)
+        modelKNN, pcaKNN, scoresKNN = knn_with_gridsearch(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, class_names)
         save_excel_cv(scoresKNN, "KNN")
 
     elif modelo == "arbol_de_decision":
@@ -121,7 +121,7 @@ def load_model():
         cnn_cross_validation(X_train_rgb_64, y_train_encoded, 'cnn2', X_test_rgb_64, y_test_encoded)
     
         ## KNN ## 
-        _, _, scoresKNN = knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
+        _, _, scoresKNN = knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, class_names)
         save_excel_cv(scoresKNN, "KNN")
 
         ## Árbol de Decisión ##

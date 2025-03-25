@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_validate
 
 from constants import CV, scoring
-from utils import evaluar_rendimiento
+from utils import evaluar_rendimiento, validacion
 
 def knn(X_train_rgb, y_train_encoded, X_test_rgb):
     X_train_flattened = X_train_rgb.reshape(X_train_rgb.shape[0], -1)
@@ -31,7 +31,7 @@ def knn(X_train_rgb, y_train_encoded, X_test_rgb):
     return knn_model, pca, scoresKNN
 
 
-def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded):
+def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, class_names):
     # Aplanar las imágenes
     X_train_flattened = X_train_rgb.reshape(X_train_rgb.shape[0], -1)
     X_test_flattened = X_test_rgb.reshape(X_test_rgb.shape[0], -1)
@@ -65,15 +65,12 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
     best_knn = best_model.named_steps['knn']
 
     results = pd.DataFrame(grid_search.cv_results_)[[
-        'test_accuracy', 
-        'test_precision', 
-        'test_recall',
-        'test_f1', 
-        'test_roc_auc'
+        'param_pca__n_components', 'param_knn__n_neighbors', 
+        'mean_test_accuracy', 'mean_test_precision', 'mean_test_recall', 'mean_test_f1', 'mean_test_roc_auc'
     ]]
 
     # Obtener las predicciones del modelo
-    y_pred_prob = grid_search.predict(X_test_rgb)  # Probabilidades de las clases
+    y_pred_prob = grid_search.predict(X_test_scaled)  # Probabilidades de las clases
     y_pred = (y_pred_prob > 0.5).astype(int)  # Convertir las probabilidades en etiquetas de clase (binario)
 
     # Si es clasificación multiclase
@@ -86,5 +83,6 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
         y_pred,
         "KNN"
     )
+    validacion(X_test_rgb, y_test_encoded, y_pred_prob, class_names)
     return best_knn, best_pca, results 
 

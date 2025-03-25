@@ -242,7 +242,7 @@ def graficar_metrics_desde_excel(file_path):
         plt.xticks(rotation=45, ha='right')
         plt.show()
 
-def validacion(X_test, y_test_encoded, y_pred):
+def validacion(X_test, y_test_encoded, y_pred, class_names):
     # Visualizar las imágenes y las predicciones
     plt.figure(figsize=(12, 6))  # Ajustar tamaño
 
