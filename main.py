@@ -153,8 +153,6 @@ def load_model():
         ## rforest_vgg16_pca_hog ##
         modelRF_hog, scoresRF_hog = rforest_vgg16_pca_hog(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, X_train_gray, X_test_gray, class_names)
 
-
-
         ## diagrama de cajas validación cru
         data = [scoresLR_rgb['test_accuracy'], scoresLR_gray['test_accuracy'], scoresKNN['test_accuracy']]
         _, ax = plt.subplots()
