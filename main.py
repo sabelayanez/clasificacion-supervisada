@@ -32,12 +32,12 @@ def load_model():
     path = kagglehub.dataset_download(dataset_name)
 
     # cargar train y test
-    #X_train_rgb, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="rgb")
-    #X_test_rgb, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="rgb")
-    #X_train_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="grayscale")
-    #X_test_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="grayscale")
-    X_train_rgb_64, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), target_size=(64, 64))
-    X_test_rgb_64, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), target_size=(64, 64))
+    X_train_rgb, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="rgb")
+    X_test_rgb, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="rgb")
+    X_train_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), channel_mode="grayscale")
+    X_test_gray, _ = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), channel_mode="grayscale")
+    #X_train_rgb_64, y_train = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/train'), target_size=(64, 64))
+    #X_test_rgb_64, y_test = cargar_imagenes(os.path.join(path, 'flowers/flowers/flower_photos/test'), target_size=(64, 64))
 
     # Codificar etiquetas
     label_encoder = LabelEncoder()
@@ -81,7 +81,7 @@ def load_model():
         # Evaluar el modelo con las funciones definidas previamente
         save_excel_cv(scores_tree, "Árbol de Decisión VGG16")
     elif modelo == "arbol_de_decision_vgg_pca":
-        model_tree, scores_tree = arbol_vgg16_pca(X_train_rgb_64, y_train_encoded)
+        model_tree, scores_tree = arbol_vgg16_pca(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded)
         # Evaluar el modelo con las funciones definidas previamente
         save_excel_cv(scores_tree, "Árbol de Decisión VGG16 PCA")
     elif modelo == "mobile_net_v2":
@@ -104,7 +104,7 @@ def load_model():
         save_excel_cv(scoresRF, "RANDOM FOREST VGG16 PCA")
     
     elif modelo == "rforest_vgg16_pca_hog":
-        modelRF_hog, scoresRF_hog = rforest_vgg16_pca_hog(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, X_train_gray, X_test_gray)
+        modelRF_hog, scoresRF_hog = rforest_vgg16_pca_hog(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, X_train_gray, X_test_gray)
 
     else: 
         print("Se realizarán todos los modelos")  
