@@ -26,13 +26,14 @@ def random_forest(X_train, y_train_encoded, X_test, y_test_encoded, class_names)
 
     # Validación cruzada
     scoresRF = cross_validate(modelRF, X_train_flat, y_train_encoded, cv=5, scoring=scoring)
-
+    
+    validacion(X_test, y_test_encoded, y_pred, class_names)
     # Visualizar imágenes y predicciones
     evaluar_rendimiento(y_test_encoded, y_pred_prob, y_pred, "Random Forest")
 
     return modelRF, scoresRF 
 
-def rforest_vgg16_pca(X_train, y_train_encoded, X_test, y_test_encoded, input_shape=(256, 256, 3), n_components=500):
+def rforest_vgg16_pca(X_train, y_train_encoded, X_test, y_test_encoded, class_names, input_shape=(256, 256, 3), n_components=500):
     
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
@@ -45,7 +46,7 @@ def rforest_vgg16_pca(X_train, y_train_encoded, X_test, y_test_encoded, input_sh
     X_train_features_flat = X_train_features.reshape(X_train_features.shape[0], -1)
     X_test_features_flat = X_test_features.reshape(X_test_features.shape[0], -1)
     
-    pca = PCA(n_components=500, svd_solver='randomized')  # Elegimos 200 características más relevantes
+    pca = PCA(n_components=n_components, svd_solver='randomized')  # Elegimos 200 características más relevantes
     X_train_pca = pca.fit_transform(X_train_features_flat)
     X_test_pca = pca.transform(X_test_features_flat)
 
@@ -68,6 +69,8 @@ def rforest_vgg16_pca(X_train, y_train_encoded, X_test, y_test_encoded, input_sh
     # Validación cruzada
     scoresRF = cross_validate(modelRF, X_train_pca, y_train_encoded, cv=5, scoring=scoring)
 
+    validacion(X_test, y_test_encoded, y_pred, class_names)
+
     # Visualizar imágenes y predicciones
     evaluar_rendimiento(y_test_encoded, y_pred_prob, y_pred, "Random Forest vgg16 PCA")
     
@@ -83,7 +86,7 @@ def extract_hog_features(images):
 
     return np.array(hog_features)
 
-def rforest_vgg16_pca_hog(X_train, y_train, X_test, y_test_encoded, X_train_gray, X_test_gray, input_shape=(256, 256, 3), n_components=500):
+def rforest_vgg16_pca_hog(X_train, y_train, X_test, y_test_encoded, X_train_gray, X_test_gray, class_names, input_shape=(256, 256, 3), n_components=500):
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
 
@@ -95,7 +98,7 @@ def rforest_vgg16_pca_hog(X_train, y_train, X_test, y_test_encoded, X_train_gray
     X_train_features_flat = X_train_features.reshape(X_train_features.shape[0], -1)
     X_test_features_flat = X_test_features.reshape(X_test_features.shape[0], -1)
     
-    pca = PCA(n_components=500, svd_solver='randomized')  # Elegimos 200 características más relevantes
+    pca = PCA(n_components=n_components, svd_solver='randomized')  # Elegimos 200 características más relevantes
     X_train_pca = pca.fit_transform(X_train_features_flat)
     X_test_pca = pca.transform(X_test_features_flat)
 
@@ -122,6 +125,7 @@ def rforest_vgg16_pca_hog(X_train, y_train, X_test, y_test_encoded, X_train_gray
     y_pred_prob = model_rf_combined.predict_proba(X_test_combined)  # Probabilidades para ROC
 
     # Visualizar imágenes y predicciones
+    validacion(X_test, y_test_encoded, y_pred, class_names)
     evaluar_rendimiento(y_test_encoded, y_pred_prob, y_pred, "Random Forest vgg16 PCA HOG")
 
     return model_rf_combined, cv_scores

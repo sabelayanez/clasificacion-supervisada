@@ -19,6 +19,10 @@ opciones = [
     ]
 ## cross validation
 CV = 5
+
+epochs = 100
+batch_size = 100
+
 # exactitud, sensibilidad, especificidad, precisión, f1-score y área bajo la curva (AUC)
 scoring = {
     'accuracy': 'accuracy',

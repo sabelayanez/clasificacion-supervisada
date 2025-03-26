@@ -14,6 +14,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from utils import validacion
 
 #Aumenta el conjunto de datos de entrenamiento aplicando transformación de rotación, desplazamiento horizontal y vertical
 train_datagen = ImageDataGenerator(
@@ -51,10 +52,10 @@ def build_vgg16_model(input_shape=(64, 64, 3), num_classes=5, dense_unit=256, dr
 
 from sklearn.utils import shuffle
 
-def vgg16(X_train, y_train, X_test, y_test, class_names, batch_size=32, epochs=10):
+def vgg16(X_train, y_train_encoded, X_test, y_test_encoded, class_names, batch_size=32, epochs=10):
 
     # Mezclar los datos antes de dividirlos en entrenamiento/validación
-    X_train, y_train = shuffle(X_train, y_train, random_state=42)
+    X_train, y_train_encoded = shuffle(X_train, y_train_encoded, random_state=42)
 
     # Data augmentation con validación
     train_datagen = ImageDataGenerator(
@@ -66,11 +67,11 @@ def vgg16(X_train, y_train, X_test, y_test, class_names, batch_size=32, epochs=1
     )
 
     # Generadores de datos separados para entrenamiento y validación
-    train_generator = train_datagen.flow(X_train, y_train, batch_size=batch_size, subset="training", shuffle=True)
-    val_generator = train_datagen.flow(X_train, y_train, batch_size=batch_size, subset="validation", shuffle=True)
+    train_generator = train_datagen.flow(X_train, y_train_encoded, batch_size=batch_size, subset="training", shuffle=True)
+    val_generator = train_datagen.flow(X_train, y_train_encoded, batch_size=batch_size, subset="validation", shuffle=True)
 
     # Construcción del modelo
-    num_classes = len(np.unique(y_train))
+    num_classes = len(np.unique(y_train_encoded))
     model = build_vgg16_model(input_shape=(64, 64, 3), num_classes=num_classes)
 
     # Configurar early stopping
@@ -84,7 +85,7 @@ def vgg16(X_train, y_train, X_test, y_test, class_names, batch_size=32, epochs=1
         verbose=1,
         callbacks=[earlystop_callback]
     )
-
+    #validacion(X_test, y_test_encoded, y_pred, class_names)
     # Evaluación del rendimiento
     #evaluar_rendimiento(model, X_test, y_test, "VGG16")
 

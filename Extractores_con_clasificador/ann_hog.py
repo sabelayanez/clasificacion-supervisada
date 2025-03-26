@@ -1,8 +1,14 @@
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam
+import numpy as np
+import matplotlib.pyplot as plt
+import random
 from tensorflow.keras.utils import to_categorical
+from utils import validacion
 
-def ann_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes):
+def ann_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes, class_names):
     # Convertir las etiquetas a one-hot encoding
     y_train_onehot = to_categorical(y_train, num_classes)
     y_test_onehot = to_categorical(y_test, num_classes)
@@ -22,14 +28,31 @@ def ann_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes):
 
     # Obtener predicciones
     y_pred_ann = ann_model.predict(X_test_hog)
-    y_pred_ann_classes = np.argmax(y_pred_ann, axis=1)
+    y_pred_ann_classes = np.argmax(y_pred_ann, axis=1)  # Obtener clases predichas
 
-    # Calcular precisión
+    # Calcular métricas
     accuracy_ann = accuracy_score(y_test, y_pred_ann_classes)
+    classification_rep = classification_report(y_test, y_pred_ann_classes, output_dict=True)
+    
+    # Calcular ROC AUC si es una clasificación multiclase
+    try:
+        roc_auc = roc_auc_score(y_test_onehot, y_pred_ann, multi_class='ovr')
+    except ValueError:
+        roc_auc = None  # No se puede calcular si hay solo una clase o problemas con la métrica
+
+    # Almacenar todas las métricas en un diccionario
+    scores_ann = {
+        'accuracy': accuracy_ann,
+        'classification_report': classification_rep,
+        'roc_auc': roc_auc
+    }
+
+    # Imprimir las métricas
     print(f"Precisión ANN con HOG: {accuracy_ann:.2f}")
-
-    # Generar reporte de clasificación
     print("\nReporte de ANN con HOG:")
-    print(classification_report(y_test, y_pred_ann_classes))
+    print(classification_rep)
 
-    return ann_model
+    # Llamar a la función de validación para visualizar las imágenes y las predicciones
+    validacion(X_test_hog, y_test, y_pred_ann, class_names)
+
+    return ann_model, scores_ann

@@ -7,8 +7,8 @@ import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-from utils import evaluar_rendimiento
-
+from utils import evaluar_rendimiento, validacion
+from constants import scoring, CV, epochs, batch_size
 import numpy as np
 
 def cnn1():
@@ -76,7 +76,7 @@ def cnn2():
 
     return model
 
-def cnn_cross_validation(X_train, y_train_encoded, X_test, y_test_encoded, cnn_model='cnn1', CV=5, epochs=10, batch_size=32):
+def cnn_cross_validation(X_train, y_train_encoded, X_test, y_test_encoded, class_names, cnn_model='cnn1', CV=CV, epochs=epochs, batch_size=batch_size):
     # Definir el número de folds
     CV = 5
     kf = StratifiedKFold(n_splits=CV, shuffle=True, random_state=42)
@@ -135,6 +135,8 @@ def cnn_cross_validation(X_train, y_train_encoded, X_test, y_test_encoded, cnn_m
     # Mostrar los resultados de cada fold
     for metric, values in scores.items():
         print(f"\n{metric}: {values}")
+
+    validacion(X_test, y_test_encoded, y_pred, class_names)
 
     evaluar_rendimiento(
         y_val_fold,
