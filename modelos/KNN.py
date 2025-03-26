@@ -30,6 +30,26 @@ def knn(X_train_rgb, y_train_encoded, X_test_rgb):
     # Return both the trained KNN model and PCA model as a tuple
     return knn_model, pca, scoresKNN
 
+def obtener_mejores_parametros(grid_search, n_components, n_neighbors):
+    # Convertir los resultados de GridSearchCV a un DataFrame
+    results_df = pd.DataFrame(grid_search.cv_results_)
+
+    # Filtrar los resultados donde pca__n_components = 30 y knn__n_neighbors = 7
+    filtered_results = results_df[
+        (results_df['param_pca__n_components'] == n_components) & 
+        (results_df['param_knn__n_neighbors'] == n_neighbors)
+    ]
+
+    filtered_results = filtered_results.rename(columns={
+        'mean_test_accuracy': 'test_accuracy',
+        'mean_test_precision': 'test_precision',
+        'mean_test_recall': 'test_recall',
+        'mean_test_f1': 'test_f1',
+        'mean_test_roc_auc': 'test_roc_auc'
+    })
+
+    return filtered_results
+
 
 def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, class_names):
     # Aplanar las imágenes
@@ -52,9 +72,8 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
         ('pca', PCA()),
         ('knn', KNeighborsClassifier())
     ])
-
     # Aplicar GridSearchCV
-    grid_search = GridSearchCV(pipeline, param_grid, cv=CV, scoring=scoring, refit='accuracy')
+    grid_search = GridSearchCV(pipeline, param_grid, cv=2, scoring=scoring, refit='accuracy', n_jobs=-1, verbose=3)
     grid_search.fit(X_train_scaled, y_train_encoded)
 
     print(f"Mejores parámetros: {grid_search.best_params_}")
@@ -64,18 +83,12 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
     best_pca = best_model.named_steps['pca']
     best_knn = best_model.named_steps['knn']
 
-    results = pd.DataFrame(grid_search.cv_results_)[[
-        'param_pca__n_components', 'param_knn__n_neighbors', 
-        'mean_test_accuracy', 'mean_test_precision', 'mean_test_recall', 'mean_test_f1', 'mean_test_roc_auc'
-    ]]
+    results = obtener_mejores_parametros(grid_search, best_pca.n_components, best_knn.n_neighbors)
 
-    # Obtener las predicciones del modelo
-    y_pred_prob = grid_search.predict(X_test_scaled)  # Probabilidades de las clases
-    y_pred = (y_pred_prob > 0.5).astype(int)  # Convertir las probabilidades en etiquetas de clase (binario)
-
-    # Si es clasificación multiclase
+    y_pred_prob = best_model.predict_proba(X_test_scaled)
     y_pred = np.argmax(y_pred_prob, axis=1)
 
+    print(results)
 
     evaluar_rendimiento(
         y_test_encoded,
@@ -83,6 +96,8 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
         y_pred,
         "KNN"
     )
+
     validacion(X_test_rgb, y_test_encoded, y_pred_prob, class_names)
+
     return best_knn, best_pca, results 
 
