@@ -21,10 +21,10 @@ def main_hog(X_train, X_test, y_train, y_test, num_classes, class_names):
 
     # Entrenar y evaluar ANN con características HOG
     print("Entrenando y evaluando ANN con características HOG...")
-    ann_model = ann_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes, class_names)
+    ann_model, scores_ann = ann_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes, class_names)
 
     # Entrenar y evaluar SVM con características HOG
     print("\nEntrenando y evaluando SVM con características HOG...")
-    svm_model = svm_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes, class_names)
+    svm_model, scores_svm = svm_hog(X_train_hog, y_train, X_test_hog, y_test, num_classes, class_names)
 
-    return ann_model, svm_model
+    return ann_model, scores_ann, svm_model, scores_svmS
