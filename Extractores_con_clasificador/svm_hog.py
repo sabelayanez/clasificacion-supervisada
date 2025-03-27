@@ -2,13 +2,17 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import cross_validate
 import numpy as np
-from utils import validacion
+from utils import validacion, extract_hog_features
 from constants import CV, scoring
 
 
-def svm_hog(X_train_hog, y_train_encoded, X_test_hog, y_test_encoded, y_test, class_names):
+def svm_hog(X_train, y_train_encoded, X_test, y_test_encoded, y_test, class_names):
     # Crear y entrenar el clasificador SVM
-    svm_model = SVC(kernel="linear", random_state=42)
+    
+    X_train_hog = extract_hog_features(X_train)
+    X_test_hog = extract_hog_features(X_test)
+    
+    svm_model = SVC(kernel="linear", probability=True, random_state=42)
     svm_model.fit(X_train_hog, y_train_encoded)
 
     # Validación cruzada para obtener métricas
@@ -26,6 +30,6 @@ def svm_hog(X_train_hog, y_train_encoded, X_test_hog, y_test_encoded, y_test, cl
     print(classification_report(y_test, y_pred_svm))
     y_pred_svm = svm_model.predict(X_test_hog)
 
-    validacion(X_test_hog, y_test_encoded, y_pred_svm, class_names)
+    #validacion(X_test_hog, y_test_encoded, y_pred_svm, class_names)
 
     return svm_model, scores_svm

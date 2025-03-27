@@ -11,7 +11,7 @@ import os
 import pandas as pd
 import numpy as np
 import random
-
+from skimage.feature import hog
 from constants import excel_filename, excel_filename_cv, scoring, class_names
 
 ## funciones para validación cruzada ##
@@ -267,3 +267,10 @@ def validacion(X_test, y_test_encoded, y_pred, class_names):
             plt.title(pred_label_str)
         else:
             plt.title(f"{pred_label_str} != {true_label_str}", color='red')
+
+def extract_hog_features(images):
+    hog_features = []
+    for img in images:
+        feature = hog(img, pixels_per_cell=(16, 16), cells_per_block=(2, 2), feature_vector=True)
+        hog_features.append(feature)
+    return np.array(hog_features)

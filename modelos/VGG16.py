@@ -10,7 +10,7 @@ from tensorflow.keras.applications import VGG16
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -85,6 +85,23 @@ def vgg16(X_train, y_train_encoded, X_test, y_test_encoded, class_names, batch_s
         verbose=1,
         callbacks=[earlystop_callback]
     )
+
+    test_loss, test_accuracy = model.evaluate(X_test, y_test_encoded, verbose=1)
+    y_pred_prob = model.predict(X_test)
+    y_pred = np.argmax(y_pred_prob, axis=1)
+
+    accuracy = accuracy_score(y_test_encoded, y_pred)
+    classification_rep = classification_report(y_test_encoded, y_pred, target_names=class_names)
+    cm = confusion_matrix(y_test_encoded, y_pred)
+    auc_roc = roc_auc_score(y_test_encoded, y_pred_prob, multi_class='ovr', average='macro')
+
+    print(f"Test Accuracy: {test_accuracy:.4f}")
+    print(f"Test Loss: {test_loss:.4f}")
+    print("Classification Report:\n", classification_rep)
+    print("Confusion Matrix:\n", cm)
+    print(f"AUC-ROC Score: {auc_roc:.4f}")
+
+
     #validacion(X_test, y_test_encoded, y_pred, class_names)
     # Evaluación del rendimiento
     #evaluar_rendimiento(model, X_test, y_test, "VGG16")
