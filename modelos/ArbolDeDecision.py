@@ -31,7 +31,7 @@ def arbol_decision(X_train, y_train):
 
     return model_tree, grid_search  # Devolver el modelo entrenado
 
-def arbol_decision_vgg16(X_train, y_train, X_test, y_test_encoded, class_names, input_shape=(256,256,3)):
+def arbol_decision_vgg16(X_train, y_train, X_test, y_test_encoded, class_names, plot, input_shape=(256,256,3)):
     # Cargar VGG16 preentrenado SIN la capa superior
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
@@ -57,19 +57,20 @@ def arbol_decision_vgg16(X_train, y_train, X_test, y_test_encoded, class_names, 
     # Entrenar el modelo con todo el conjunto de entrenamiento
     model_tree_vgg.fit(X_train_features_flat, y_train)
 
-    # Obtener las predicciones del modelo
-    y_pred_prob = model_tree_vgg.predict_proba(X_test_features_flat)
-    y_pred = np.argmax(y_pred_prob, axis=1)
+    if plot == True:
+        # Obtener las predicciones del modelo
+        y_pred_prob = model_tree_vgg.predict_proba(X_test_features_flat)
+        y_pred = np.argmax(y_pred_prob, axis=1)
 
-    validacion(X_test, y_test_encoded, y_pred, class_names)
+        validacion(X_test, y_test_encoded, y_pred, class_names)
 
-    evaluar_rendimiento(
-        y_test_encoded, y_pred_prob, y_pred, "Arbol decisión VGG16"
-    )
+        evaluar_rendimiento(
+            y_test_encoded, y_pred_prob, y_pred, "Arbol decisión VGG16"
+        )
 
     return model_tree_vgg, scores_tree_vgg
 
-def arbol_vgg16_pca(X_train, y_train, X_test, y_test_encoded, class_names, input_shape=(256,256,3), n_components=500):
+def arbol_vgg16_pca(X_train, y_train, X_test, y_test_encoded, class_names, plot, input_shape=(256,256,3), n_components=500):
     # Cargar VGG16 preentrenado SIN la capa superior
     base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
     feature_extractor = Model(inputs=base_model.input, outputs=base_model.output)
@@ -99,15 +100,15 @@ def arbol_vgg16_pca(X_train, y_train, X_test, y_test_encoded, class_names, input
 
     # Entrenar el modelo con todo el conjunto de entrenamiento
     model_tree_pca.fit(X_train_pca, y_train)
+    if plot == True:
+        # Obtener las predicciones del modelo
+        y_pred_prob = model_tree_pca.predict_proba(X_test_pca)
+        y_pred = np.argmax(y_pred_prob, axis=1)
 
-    # Obtener las predicciones del modelo
-    y_pred_prob = model_tree_pca.predict_proba(X_test_pca)
-    y_pred = np.argmax(y_pred_prob, axis=1)
+        validacion(X_test, y_test_encoded, y_pred, class_names)
 
-    validacion(X_test, y_test_encoded, y_pred, class_names)
-
-    evaluar_rendimiento(
-        y_test_encoded, y_pred_prob, y_pred, "Arbol decisión VGG16 PCA"
-    )
+        evaluar_rendimiento(
+            y_test_encoded, y_pred_prob, y_pred, "Arbol decisión VGG16 PCA"
+        )
 
     return model_tree_pca, scores_tree_pca

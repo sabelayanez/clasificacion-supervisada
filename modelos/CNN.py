@@ -76,9 +76,9 @@ def cnn2():
 
     return model
 
-def cnn_cross_validation(X_train, y_train_encoded, X_test, y_test_encoded, class_names, cnn_model='cnn1', CV=CV, epochs=epochs, batch_size=batch_size):
+def cnn_cross_validation(X_train, y_train_encoded, X_test, y_test_encoded, class_names, cnn_model='cnn1', plot=True, CV=CV, epochs=epochs, batch_size=batch_size):
     # Definir el número de folds
-    CV = 5
+    CV = 2
     kf = StratifiedKFold(n_splits=CV, shuffle=True, random_state=42)
 
 

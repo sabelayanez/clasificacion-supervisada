@@ -32,7 +32,7 @@ def build_mobilenetv2_model(input_shape=(256, 256, 3), num_classes=5, dense_unit
     
     return model
 
-def train_mobilenetv2_model(X_train, y_train, X_test, y_test, y_test_encoded, class_names, input_shape=(256, 256, 3), num_classes=5, epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001):
+def train_mobilenetv2_model(X_train, y_train, X_test, y_test, y_test_encoded, class_names, plot, input_shape=(256, 256, 3), num_classes=5, epochs=10, batch_size=32, dense_units=1024, dropout_rate=0.5, learning_rate=0.001):
 
     model = build_mobilenetv2_model(input_shape=input_shape, num_classes=num_classes, dense_units=dense_units, dropout_rate=dropout_rate, learning_rate=learning_rate)
     
@@ -49,15 +49,16 @@ def train_mobilenetv2_model(X_train, y_train, X_test, y_test, y_test_encoded, cl
         verbose=1
     )
 
-    # Obtener las predicciones del modelo
-    y_pred_prob = model.predict(X_test)  # Probabilidades de las clases
-    y_pred = (y_pred_prob > 0.5).astype(int)  # Convertir las probabilidades en etiquetas de clase (binario)
+    if plot == True:
+        # Obtener las predicciones del modelo
+        y_pred_prob = model.predict(X_test)  # Probabilidades de las clases
+        y_pred = (y_pred_prob > 0.5).astype(int)  # Convertir las probabilidades en etiquetas de clase (binario)
 
-    # Si es clasificación multiclase
-    y_pred = np.argmax(y_pred_prob, axis=1)
+        # Si es clasificación multiclase
+        y_pred = np.argmax(y_pred_prob, axis=1)
 
-    validacion(X_test, y_test_encoded, y_pred, class_names)
+        validacion(X_test, y_test_encoded, y_pred, class_names)
 
-    evaluar_rendimiento(y_test_encoded, y_pred_prob, y_pred, "MobileNetV2")
+        evaluar_rendimiento(y_test_encoded, y_pred_prob, y_pred, "MobileNetV2")
 
     return model

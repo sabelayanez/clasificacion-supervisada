@@ -74,6 +74,8 @@ def evaluar_mobilenetv2(model, X_test, y_test):
     }
 
     save_excel_cv(datos, "MobileNetV2")
+
+    return datos
     
 ## guardar datos en excel ##
 def save_to_excel(datos):

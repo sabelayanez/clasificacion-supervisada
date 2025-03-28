@@ -15,7 +15,8 @@ opciones = [
     "mobile_net_v2",
     "random_forest",
     "rforest_vgg16_pca",
-    "rforest_vgg16_pca_hog"
+    "rforest_vgg16_pca_hog",
+    "hog"
     ]
 ## cross validation
 CV = 5

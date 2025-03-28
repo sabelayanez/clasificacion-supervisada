@@ -51,7 +51,7 @@ def obtener_mejores_parametros(grid_search, n_components, n_neighbors):
     return filtered_results
 
 
-def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, class_names):
+def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, class_names, plot):
     # Aplanar las imágenes
     X_train_flattened = X_train_rgb.reshape(X_train_rgb.shape[0], -1)
     X_test_flattened = X_test_rgb.reshape(X_test_rgb.shape[0], -1)
@@ -85,19 +85,18 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
 
     results = obtener_mejores_parametros(grid_search, best_pca.n_components, best_knn.n_neighbors)
 
-    y_pred_prob = best_model.predict_proba(X_test_scaled)
-    y_pred = np.argmax(y_pred_prob, axis=1)
+    if plot == True:
+        y_pred_prob = best_model.predict_proba(X_test_scaled)
+        y_pred = np.argmax(y_pred_prob, axis=1)
 
-    print(results)
+        evaluar_rendimiento(
+            y_test_encoded,
+            y_pred_prob,
+            y_pred,
+            "KNN"
+        )
 
-    evaluar_rendimiento(
-        y_test_encoded,
-        y_pred_prob,
-        y_pred,
-        "KNN"
-    )
-
-    validacion(X_test_rgb, y_test_encoded, y_pred_prob, class_names)
+        validacion(X_test_rgb, y_test_encoded, y_pred_prob, class_names)
 
     return best_knn, best_pca, results 
 
