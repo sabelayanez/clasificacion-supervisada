@@ -20,13 +20,15 @@ def random_forest(X_train, y_train_encoded, X_test, y_test_encoded, class_names,
     # Crear y entrenar el modelo Random Forest
     modelRF = RandomForestClassifier(n_estimators=100, random_state=42)
     modelRF.fit(X_train_flat, y_train_encoded)
+
+    # Validación cruzada
+    scoresRF = cross_validate(modelRF, X_train_flat, y_train_encoded, cv=5, scoring=scoring)
+        
+
     if plot == True:
         y_pred = modelRF.predict(X_test_flat)
         y_pred_prob = modelRF.predict_proba(X_test_flat)  # Probabilidades para ROC
 
-        # Validación cruzada
-        scoresRF = cross_validate(modelRF, X_train_flat, y_train_encoded, cv=5, scoring=scoring)
-        
         validacion(X_test, y_test_encoded, y_pred, class_names)
         # Visualizar imágenes y predicciones
         evaluar_rendimiento(y_test_encoded, y_pred_prob, y_pred, "Random Forest")
@@ -66,9 +68,6 @@ def rforest_vgg16_pca(X_train, y_train_encoded, X_test, y_test_encoded, class_na
     if plot == True:
         y_pred = modelRF.predict(X_test_pca)
         y_pred_prob = modelRF.predict_proba(X_test_pca)  # Probabilidades para ROC
-
-        # Validación cruzada
-        scoresRF = cross_validate(modelRF, X_train_pca, y_train_encoded, cv=5, scoring=scoring)
 
         validacion(X_test, y_test_encoded, y_pred, class_names)
 

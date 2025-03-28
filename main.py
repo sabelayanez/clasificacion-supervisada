@@ -123,9 +123,9 @@ def load_model():
         ## regresión logística gray ##
         _, scoresLR_gray = regresion_logistica(X_train_gray, y_train_encoded, X_test_gray, y_test_encoded, class_names, False)
         ## CNN1 ##
-        cnn_cross_validation(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, class_names, 'cnn1', False)
+        #cnn_cross_validation(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, class_names, 'cnn1', False)
         ## CNN2 ##    
-        cnn_cross_validation(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, class_names, 'cnn2', False)
+        #cnn_cross_validation(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, class_names, 'cnn2', False)
         ## KNN ## 
         _, _, scoresKNN = knn_with_gridsearch(X_train_rgb_64, y_train_encoded, X_test_rgb_64, y_test_encoded, class_names, False)
         ## Árbol de Decisión VGG16 ##
