@@ -31,10 +31,9 @@ def knn(X_train_rgb, y_train_encoded, X_test_rgb):
     return knn_model, pca, scoresKNN
 
 def obtener_mejores_parametros(grid_search, n_components, n_neighbors):
-    # Convertir los resultados de GridSearchCV a un DataFrame
+    # convertir los resultados de GridSearchCV a un DataFrame
     results_df = pd.DataFrame(grid_search.cv_results_)
 
-    # Filtrar los resultados donde pca__n_components = 30 y knn__n_neighbors = 7
     filtered_results = results_df[
         (results_df['param_pca__n_components'] == n_components) & 
         (results_df['param_knn__n_neighbors'] == n_neighbors)
@@ -52,7 +51,6 @@ def obtener_mejores_parametros(grid_search, n_components, n_neighbors):
 
 
 def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded, class_names, plot):
-    # Aplanar las imágenes
     X_train_flattened = X_train_rgb.reshape(X_train_rgb.shape[0], -1)
     X_test_flattened = X_test_rgb.reshape(X_test_rgb.shape[0], -1)
 
@@ -61,7 +59,7 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
     X_train_scaled = scaler.fit_transform(X_train_flattened)
     X_test_scaled = scaler.transform(X_test_flattened)
 
-    # Definir el espacio de búsqueda de hiperparámetros
+    # espacio de búsqueda de hiperparámetros
     param_grid = {
         'pca__n_components': [30, 50],
         'knn__n_neighbors': [3, 7]
@@ -78,7 +76,7 @@ def knn_with_gridsearch(X_train_rgb, y_train_encoded, X_test_rgb, y_test_encoded
 
     print(f"Mejores parámetros: {grid_search.best_params_}")
 
-    # Obtener el mejor modelo
+    # mejor modelo
     best_model = grid_search.best_estimator_
     best_pca = best_model.named_steps['pca']
     best_knn = best_model.named_steps['knn']

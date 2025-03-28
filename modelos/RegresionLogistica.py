@@ -7,7 +7,7 @@ from utils import evaluar_rendimiento, validacion
 def regresion_logistica(X_train, y_train_encoded, X_test, y_test_encoded, class_names, plot):
     # Aplanar las imágenes de 4D a 2D
     X_train_flat = X_train.reshape(X_train.shape[0], -1)  # Aplanar a 2D: [n_samples, n_features]
-    # Entrenar modelo de Regresión Logística
+    # Regresión Logística
     modelLR = LogisticRegression(penalty=None, solver='lbfgs', max_iter=10000)
 
     # Validación cruzada

@@ -18,14 +18,13 @@ def build_mobilenetv2_model(input_shape=(256, 256, 3), num_classes=5, dense_unit
     for layer in base_model.layers:
         layer.trainable = False
 
-    # Construir el modelo con la capa GlobalAveragePooling2D y las capas densas
     x = base_model.output
-    x = GlobalAveragePooling2D()(x)  # Reducción de la dimensionalidad
-    x = Dense(dense_units, activation='relu')(x)  # Capa densa con hiperparámetro ajustable
-    x = Dropout(dropout_rate)(x)  # Capa de Dropout para regularización
-    predictions = Dense(num_classes, activation='softmax')(x)  # Capa de salida con softmax
+    x = GlobalAveragePooling2D()(x)  
+    x = Dense(dense_units, activation='relu')(x)  
+    x = Dropout(dropout_rate)(x)  
+    predictions = Dense(num_classes, activation='softmax')(x)  
 
-    # Crear el modelo final
+    #modelo final
     model = Model(inputs=base_model.input, outputs=predictions)
 
     model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
@@ -36,7 +35,7 @@ def train_mobilenetv2_model(X_train, y_train, X_test, y_test, y_test_encoded, cl
 
     model = build_mobilenetv2_model(input_shape=input_shape, num_classes=num_classes, dense_units=dense_units, dropout_rate=dropout_rate, learning_rate=learning_rate)
     
-    # Configurar EarlyStopping para evitar sobreajuste
+    # EarlyStopping para evitar sobreajuste
     earlystop_callback = callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
     # Entrenar el modelo
@@ -50,11 +49,9 @@ def train_mobilenetv2_model(X_train, y_train, X_test, y_test, y_test_encoded, cl
     )
 
     if plot == True:
-        # Obtener las predicciones del modelo
         y_pred_prob = model.predict(X_test)  # Probabilidades de las clases
-        y_pred = (y_pred_prob > 0.5).astype(int)  # Convertir las probabilidades en etiquetas de clase (binario)
-
-        # Si es clasificación multiclase
+        y_pred = (y_pred_prob > 0.5).astype(int)  
+        
         y_pred = np.argmax(y_pred_prob, axis=1)
 
         validacion(X_test, y_test_encoded, y_pred, class_names)

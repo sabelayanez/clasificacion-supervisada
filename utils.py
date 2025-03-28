@@ -39,20 +39,11 @@ def evaluar_mobilenetv2(model, X_test, y_test):
 
     y_test_class = np.argmax(y_test, axis=1)  
 
-    # Calcular Accuracy
     accuracy = accuracy_score(y_test_class, y_pred)
-    
-    # Calcular Precision
     precision = precision_score(y_test_class, y_pred, average='macro', zero_division=0)
-    
-    # Calcular Recall
     recall = recall_score(y_test_class, y_pred, average='macro', zero_division=0)
-    
-    # Calcular F1 Score
     f1 = f1_score(y_test_class, y_pred, average='macro', zero_division=0)
     
-    # Calcular ROC AUC Score (solo para clasificación binaria o multiclasificación)
-    # Si es clasificación binaria, usar average='macro', para multiclase 'ovr' (One-vs-Rest)
     if y_test_class.shape[0] > 1:
         roc_auc = roc_auc_score(y_test_class, y_pred_prob, multi_class='ovr', average='macro')
     else:
@@ -99,12 +90,9 @@ def graficar_metrics_desde_excel(file_path):
     if not all(col in df.columns for col in scoring.keys()):
         raise ValueError(f"El archivo debe contener las siguientes columnas: {scoring.keys()}")
 
-    # Extraer los modelos (que están en el índice)
     modelos = df.index
     metrics = ['accuracy', 'precision', 'recall', 'f1', 'roc_auc']
 
-
-    # Graficar la media de cada métrica para cada modelo
     for metric in metrics:
         plt.figure(figsize=(8, 5))
         plt.bar(modelos, df[metric], color='g')
@@ -113,7 +101,7 @@ def graficar_metrics_desde_excel(file_path):
         print(df[metric])
         plt.xlabel('Modelo')
         plt.ylabel(f'Media de {metric.capitalize()}')
-        plt.ylim([0, 1])  # Asegurarse de que el rango de la métrica esté entre 0 y 1
+        plt.ylim([0, 1])  
         plt.xticks(rotation=45, ha='right')
         plt.show()
 
@@ -254,10 +242,10 @@ def validacion(X_test, y_test_encoded, y_pred, class_names):
         true_label_num = y_test_encoded[index]  # Etiqueta real codificada
         
         # Obtener la predicción
-        pred_label_num = np.argmax(y_pred[index])  # Etiqueta predicha
+        pred_label_num = np.argmax(y_pred[index])  
         
-        true_label_str = class_names[true_label_num]  # Nombre de la clase real
-        pred_label_str = class_names[pred_label_num]  # Nombre de la clase predicha
+        true_label_str = class_names[true_label_num] 
+        pred_label_str = class_names[pred_label_num] 
 
         # Dibujar imagen
         plt.subplot(2, 5, i + 1)
